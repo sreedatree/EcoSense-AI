@@ -48,37 +48,40 @@ def clean_data(data):
 def create_features(data):
     """
     Create time-based and historical features for machine learning.
+    Input:
+        data (pd.DataFrame): Cleaned electricity consumption data.
+    Process:
+        Extract time features and calculate historical
+        electricity usage statistics.
+    Output:
+        pd.DataFrame: Dataset containing engineered features.
     """
 
     data = data.copy()
 
-    # Time-based features
+    # Create time-based features
     data["hour"] = data["datetime"].dt.hour
     data["day_of_week"] = data["datetime"].dt.dayofweek
     data["month"] = data["datetime"].dt.month
     data["day_of_year"] = data["datetime"].dt.dayofyear
 
-    # Historical electricity usage
+    # Historical electricity consumption
+    data["previous_minute"] = data["Global_active_power"].shift(1)
     data["previous_hour"] = data["Global_active_power"].shift(60)
-
     data["previous_day"] = data["Global_active_power"].shift(1440)
 
-    # Rolling statistics
+    # Rolling statistics using only previous observations
+    historical_power = data["Global_active_power"].shift(1)
+
     data["rolling_mean_1hr"] = (
-        data["Global_active_power"]
-        .rolling(window=60)
-        .mean()
+        historical_power.rolling(window=60).mean()
     )
-
     data["rolling_std_1hr"] = (
-        data["Global_active_power"]
-        .rolling(window=60)
-        .std()
+        historical_power.rolling(window=60).std()
     )
 
-    # Remove rows created by lag/rolling calculations
+    # Remove rows without sufficient historical information
     data = data.dropna()
-
     return data
 
 

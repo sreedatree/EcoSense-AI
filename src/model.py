@@ -96,29 +96,54 @@ def evaluate_model(model, X_test, y_test):
         X_test: Testing features.
         y_test: Actual electricity consumption.
     Process:
-        Generate predictions and calculate evaluation metrics.
+        Generate Random Forest predictions.
+        Compare them against a persistence baseline.
+        Calculate MAE, RMSE, and R².
     Output:
-        Predicted electricity consumption values.
+        Random Forest predictions.
     """
 
+    # Random Forest predictions
     predictions = model.predict(X_test)
 
+    # Persistence baseline: predict the previous minute's value
+    baseline_predictions = X_test["previous_minute"].to_numpy()
+
+    # Evaluate Random Forest
     mae = mean_absolute_error(y_test, predictions)
-
-    rmse = mean_squared_error(
-        y_test,
-        predictions
-    ) ** 0.5
-
+    rmse = mean_squared_error(y_test, predictions) ** 0.5
     r2 = r2_score(y_test, predictions)
 
+    # Evaluate baseline
+    baseline_mae = mean_absolute_error(
+        y_test, baseline_predictions
+    )
+    baseline_rmse = mean_squared_error(
+        y_test, baseline_predictions
+    ) ** 0.5
+    baseline_r2 = r2_score(
+        y_test, baseline_predictions
+    )
+
     print("\n" + "=" * 50)
-    print("ECOSENSE AI - MODEL PERFORMANCE")
+    print("ECOSENSE AI - MODEL COMPARISON")
     print("=" * 50)
 
+    print("\nRandom Forest:")
     print(f"MAE:  {mae:.4f}")
     print(f"RMSE: {rmse:.4f}")
     print(f"R²:   {r2:.4f}")
+
+    print("\nPersistence Baseline:")
+    print(f"MAE:  {baseline_mae:.4f}")
+    print(f"RMSE: {baseline_rmse:.4f}")
+    print(f"R²:   {baseline_r2:.4f}")
+
+    improvement = (
+        (baseline_mae - mae) / baseline_mae
+    ) * 100
+
+    print(f"\nMAE improvement over baseline: {improvement:.2f}%")
 
     return predictions
 

@@ -1,0 +1,26 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+venv/
+env/
+ENV/
+.venv/
+
+# Large datasets and local caches
+data/raw/*
+!data/raw/.gitkeep
+*.parquet
+
+# Model artifacts
+*.joblib
+*.pkl
+
+# macOS system files
+.DS_Store
+
+# Editor configurations
+.vscode/
+.idea/
